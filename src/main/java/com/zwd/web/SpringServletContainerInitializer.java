@@ -1,12 +1,11 @@
 package com.zwd.web;
 
-import com.zwd.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
 import javax.servlet.annotation.HandlesTypes;
+import java.lang.reflect.Modifier;
 import java.util.Set;
 
 /**
@@ -15,17 +14,25 @@ import java.util.Set;
  * @author zwd
  * @since 2019-04-18
  **/
-//@HandlesTypes(WebApplicationInitializer.class)
+@HandlesTypes(WebApplicationInitializer.class)
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
     @Override
-    public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+    public void onStartup(Set<Class<?>> webAppInitializerClass, ServletContext ctx) throws ServletException {
 
-        System.out.println("zzzz");
-        ServletRegistration.Dynamic spring = ctx.addServlet("testServlet", new DispatcherServlet());
+        for (Class waiClass : webAppInitializerClass) {
 
-        spring.addMapping("/*");
-
-        spring.setLoadOnStartup(1);
+            if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
+            WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
+                try {
+                    WebApplicationInitializer newInstance =(WebApplicationInitializer)waiClass.newInstance();
+                    newInstance.onStartup(ctx);
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
     }
 }
