@@ -91,8 +91,6 @@ public class DispatcherServlet extends HttpServlet{
 
             }
         }
-        SpringmvcController wuqi = (SpringmvcController) instanceMap.get("wuqi");
-        System.out.print(wuqi);
     }
 
     /**
