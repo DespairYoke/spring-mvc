@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author zwd
  * @since 2019-04-18
  **/
-@Controller("wuqi")
+@Controller("zwd")
 public class SpringmvcController {
 
     @Quatifier(value = "MyServiceImpl")
