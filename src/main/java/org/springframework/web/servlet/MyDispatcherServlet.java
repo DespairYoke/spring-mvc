@@ -92,7 +92,7 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
 
     public void initStrategies(ApplicationContext context) {
         initHandlerMappings(context);
-        initHandlerAdapters(context);
+//        initHandlerAdapters(context);
     }
 
     private void initHandlerMappings(ApplicationContext context) {
