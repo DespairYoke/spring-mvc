@@ -67,11 +67,19 @@
                     <!--<url>http://localhost:8080/data</url>-->
                     <!--<server>tomcat7-local</server>-->
                     <!--项目名称根路径-->
-                    <path>/spring-web</path>
+                    <path>/spring-mvc</path>
                 </configuration>
 
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
 </project>
