@@ -11,7 +11,7 @@
     <context:component-scan base-package="com.zwd.web"/>
 
 
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.MyInternalResourceViewResolver">
+    <bean id="myViewResolver" class="org.springframework.web.servlet.view.MyInternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/jsp/"/>
         <property name="suffix" value=".jsp"/>
     </bean>

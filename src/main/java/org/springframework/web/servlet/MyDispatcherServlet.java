@@ -53,6 +53,8 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
     @Nullable
     private List<MyHandlerAdapter> handlerAdapters;
 
+    private boolean detectAllViewResolvers = true;
+
     public static final String LOCALE_RESOLVER_ATTRIBUTE = MyDispatcherServlet.class.getName() + ".LOCALE_RESOLVER";
 
 
@@ -68,7 +70,16 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
 
     public static final String HANDLER_ADAPTER_BEAN_NAME = "myhandlerAdapter";
 
+    public static final String INPUT_FLASH_MAP_ATTRIBUTE = MyDispatcherServlet.class.getName() + ".INPUT_FLASH_MAP";
+
+    public static final String OUTPUT_FLASH_MAP_ATTRIBUTE = MyDispatcherServlet.class.getName() + ".OUTPUT_FLASH_MAP";
+
+    public static final String VIEW_RESOLVER_BEAN_NAME = "myViewResolver";
+
     private boolean detectAllHandlerAdapters = true;
+
+    @Nullable
+    private List<MyViewResolver> viewResolvers;
 
     static {
         // Load default strategy implementations from properties file.
@@ -92,7 +103,8 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
 
     public void initStrategies(ApplicationContext context) {
         initHandlerMappings(context);
-//        initHandlerAdapters(context);
+        initHandlerAdapters(context);
+        initViewResolvers(context);
     }
 
     private void initHandlerMappings(ApplicationContext context) {
@@ -106,34 +118,41 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
         }
     }
     private void initHandlerAdapters(ApplicationContext context) {
-        this.handlerAdapters = null;
 
-        if (this.detectAllHandlerAdapters) {
-            // Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
-            Map<String, MyHandlerAdapter> matchingBeans =
-                    BeanFactoryUtils.beansOfTypeIncludingAncestors(context, MyHandlerAdapter.class, true, false);
+        this.handlerAdapters = getDefaultStrategies(context, MyHandlerAdapter.class);
+
+    }
+
+    private void initViewResolvers(ApplicationContext context) {
+        this.viewResolvers = null;
+
+        if (this.detectAllViewResolvers) {
+            // Find all ViewResolvers in the ApplicationContext, including ancestor contexts.
+            Map<String, MyViewResolver> matchingBeans =
+                    BeanFactoryUtils.beansOfTypeIncludingAncestors(context, MyViewResolver.class, true, false);
             if (!matchingBeans.isEmpty()) {
-                this.handlerAdapters = new ArrayList<>(matchingBeans.values());
-                // We keep HandlerAdapters in sorted order.
-                AnnotationAwareOrderComparator.sort(this.handlerAdapters);
+                this.viewResolvers = new ArrayList<>(matchingBeans.values());
+                // We keep ViewResolvers in sorted order.
+                AnnotationAwareOrderComparator.sort(this.viewResolvers);
+
             }
         }
         else {
             try {
-                MyHandlerAdapter ha = context.getBean(HANDLER_ADAPTER_BEAN_NAME, MyHandlerAdapter.class);
-                this.handlerAdapters = Collections.singletonList(ha);
+                MyViewResolver vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, MyViewResolver.class);
+                this.viewResolvers = Collections.singletonList(vr);
             }
             catch (NoSuchBeanDefinitionException ex) {
-                // Ignore, we'll add a default HandlerAdapter later.
+                // Ignore, we'll add a default ViewResolver later.
             }
         }
 
-        // Ensure we have at least some HandlerAdapters, by registering
-        // default HandlerAdapters if no other adapters are found.
-        if (this.handlerAdapters == null) {
-            this.handlerAdapters = getDefaultStrategies(context, MyHandlerAdapter.class);
+        // Ensure we have at least one ViewResolver, by registering
+        // a default ViewResolver if no other resolvers are found.
+        if (this.viewResolvers == null) {
+            this.viewResolvers = getDefaultStrategies(context, MyViewResolver.class);
             if (logger.isDebugEnabled()) {
-                logger.debug("No HandlerAdapters found in servlet '" + getServletName() + "': using default");
+                logger.debug("No ViewResolvers found in servlet '" + getServletName() + "': using default");
             }
         }
     }
@@ -202,53 +221,11 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
     @Override
     protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-//            if (logger.isDebugEnabled()) {
-//                String resumed = WebAsyncUtils.getAsyncManager(request).hasConcurrentResult() ? " resumed" : "";
-//                logger.debug("DispatcherServlet with name '" + getServletName() + "'" + resumed +
-//                        " processing " + request.getMethod() + " request for [" + getRequestUri(request) + "]");
-//            }
-
-            // Keep a snapshot of the request attributes in case of an include,
-            // to be able to restore the original attributes after the include.
-//            Map<String, Object> attributesSnapshot = null;
-//            if (WebUtils.isIncludeRequest(request)) {
-//                attributesSnapshot = new HashMap<>();
-//                Enumeration<?> attrNames = request.getAttributeNames();
-//                while (attrNames.hasMoreElements()) {
-//                    String attrName = (String) attrNames.nextElement();
-//                    if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {
-//                        attributesSnapshot.put(attrName, request.getAttribute(attrName));
-//                    }
-//                }
-//            }
-//
-//            // Make framework objects available to handlers and view objects.
-//            request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
-//            request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
-//            request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
-//            request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
-//
-//            if (this.flashMapManager != null) {
-//                MyFlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
-//                if (inputFlashMap != null) {
-//                    request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
-//                }
-//                request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
-//                request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
-//            }
-
-//            try {
-//                doDispatch(request, response);
-//            }
-//            finally {
-//                if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
-//                    // Restore the original attribute snapshot, in case of an include.
-//                    if (attributesSnapshot != null) {
-//                        restoreAttributesAfterInclude(request, attributesSnapshot);
-//                    }
-//                }
-//            }
-            doDispatch(request, response);
+        request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
+        request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
+        request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
+        request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
+        doDispatch(request, response);
     }
 
     @Nullable
@@ -257,16 +234,88 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
     }
 
     protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Exception dispatchException = null;
         MyHandlerExecutionChain mappedHandler = null;
-
+        MyModelAndView mv = null;
         HttpServletRequest processedRequest = request;
         mappedHandler = getHandler(processedRequest);
-//        MyHandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+        MyHandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 //
-//        mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+        mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
+//        applyDefaultViewName(processedRequest, mv);
+
+        processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 
     }
+
+
+    private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
+                                       @Nullable MyHandlerExecutionChain mappedHandler, @Nullable MyModelAndView mv,
+                                       @Nullable Exception exception) throws Exception {
+
+        render(mv, request, response);
+    }
+
+    protected void render(MyModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // Determine locale for request and apply it to the response.
+        Locale locale =
+                (this.localeResolver != null ? this.localeResolver.resolveLocale(request) : request.getLocale());
+        response.setLocale(locale);
+
+        MyView view;
+        String viewName = mv.getViewName();
+        if (viewName != null) {
+            // We need to resolve the view name.
+            view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
+            if (view == null) {
+                throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
+                        "' in servlet with name '" + getServletName() + "'");
+            }
+        }
+        else {
+            // No need to lookup: the ModelAndView object contains the actual View object.
+            view = mv.getView();
+            if (view == null) {
+                throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
+                        "View object in servlet with name '" + getServletName() + "'");
+            }
+        }
+
+        // Delegate to the View object for rendering.
+        if (logger.isDebugEnabled()) {
+            logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'");
+        }
+        try {
+            if (mv.getStatus() != null) {
+                response.setStatus(mv.getStatus().value());
+            }
+            view.render(mv.getModelInternal(), request, response);
+        }
+        catch (Exception ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Error rendering view [" + view + "] in DispatcherServlet with name '" +
+                        getServletName() + "'", ex);
+            }
+            throw ex;
+        }
+    }
+
+    @Nullable
+    protected MyView resolveViewName(String viewName, @Nullable Map<String, Object> model,
+                                   Locale locale, HttpServletRequest request) throws Exception {
+
+        if (this.viewResolvers != null) {
+            for (MyViewResolver viewResolver : this.viewResolvers) {
+                MyView view = viewResolver.resolveViewName(viewName, locale);
+                if (view != null) {
+                    return view;
+                }
+            }
+        }
+        return null;
+    }
+
     protected MyHandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
         if (this.handlerAdapters != null) {
             for (MyHandlerAdapter ha : this.handlerAdapters) {
@@ -298,20 +347,5 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
         return null;
     }
 
-//    @Nullable
-//    protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-//        if (this.handlerMappings != null) {
-//            for (HandlerMapping hm : this.handlerMappings) {
-//                if (logger.isTraceEnabled()) {
-//                    logger.trace(
-//                            "Testing handler map [" + hm + "] in DispatcherServlet with name '" + getServletName() + "'");
-//                }
-//                HandlerExecutionChain handler = hm.getHandler(request);
-//                if (handler != null) {
-//                    return handler;
-//                }
-//            }
-//        }
-//        return null;
-//    }
+
 }
