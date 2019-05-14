@@ -76,6 +76,8 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
 
     public static final String VIEW_RESOLVER_BEAN_NAME = "myViewResolver";
 
+    public static final String FLASH_MAP_MANAGER_ATTRIBUTE = MyDispatcherServlet.class.getName() + ".FLASH_MAP_MANAGER";
+
     private boolean detectAllHandlerAdapters = true;
 
     @Nullable

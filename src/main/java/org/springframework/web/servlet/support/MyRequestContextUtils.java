@@ -3,16 +3,18 @@ package org.springframework.web.servlet.support;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.servlet.MyDispatcherServlet;
-import org.springframework.web.servlet.MyFlashMap;
-import org.springframework.web.servlet.MyLocaleContextResolver;
-import org.springframework.web.servlet.MyLocaleResolver;
+import org.springframework.web.servlet.*;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -70,9 +72,27 @@ public abstract class MyRequestContextUtils {
     }
 
     @Nullable
+    public static MyFlashMapManager getFlashMapManager(HttpServletRequest request) {
+        return (MyFlashMapManager) request.getAttribute(MyDispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE);
+    }
+
+    @Nullable
     public static MyLocaleResolver getLocaleResolver(HttpServletRequest request) {
         return (MyLocaleResolver) request.getAttribute(MyDispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
     }
 
+    public static void saveOutputFlashMap(String location, HttpServletRequest request, HttpServletResponse response) {
+        MyFlashMap flashMap = getOutputFlashMap(request);
+        if (CollectionUtils.isEmpty(flashMap)) {
+            return;
+        }
 
+        UriComponents uriComponents = UriComponentsBuilder.fromUriString(location).build();
+        flashMap.setTargetRequestPath(uriComponents.getPath());
+        flashMap.addTargetRequestParams(uriComponents.getQueryParams());
+
+        MyFlashMapManager manager = getFlashMapManager(request);
+        Assert.state(manager != null, "No FlashMapManager. Is this a DispatcherServlet handled request?");
+        manager.saveOutputFlashMap(flashMap, request, response);
+    }
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.servlet.MyView;
 
 import java.util.HashMap;
@@ -29,6 +30,8 @@ public class MyUrlBasedViewResolver extends MyAbstractCachingViewResolver{
     @Nullable
     private String contentType;
 
+    public static final String FORWARD_URL_PREFIX = "forward:";
+
     @Nullable
     private String requestContextAttribute;
 
@@ -37,6 +40,24 @@ public class MyUrlBasedViewResolver extends MyAbstractCachingViewResolver{
 
     @Nullable
     private String[] exposedContextBeanNames;
+
+    private boolean redirectContextRelative = true;
+
+    private boolean redirectHttp10Compatible = true;
+
+    @Nullable
+    private String[] redirectHosts;
+
+    @Nullable
+    public String[] getRedirectHosts() {
+        return this.redirectHosts;
+    }
+
+    @Nullable
+    private String[] viewNames;
+
+    public static final String REDIRECT_URL_PREFIX = "redirect:";
+
 
     private final Map<String, Object> staticAttributes = new HashMap<>();
 
@@ -161,6 +182,49 @@ public class MyUrlBasedViewResolver extends MyAbstractCachingViewResolver{
         }
 
         return view;
+    }
+
+    protected boolean canHandle(String viewName, Locale locale) {
+        String[] viewNames = getViewNames();
+        return (viewNames == null || PatternMatchUtils.simpleMatch(viewNames, viewName));
+    }
+
+    @Nullable
+    protected String[] getViewNames() {
+        return this.viewNames;
+    }
+    protected boolean isRedirectHttp10Compatible() {
+        return this.redirectHttp10Compatible;
+    }
+    @Override
+    protected MyView createView(String viewName, Locale locale) throws Exception {
+        // If this resolver is not supposed to handle the given view,
+        // return null to pass on to the next resolver in the chain.
+        if (!canHandle(viewName, locale)) {
+            return null;
+        }
+        // Check for special "redirect:" prefix.
+        if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
+            String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
+            MyRedirectView view = new MyRedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+            String[] hosts = getRedirectHosts();
+            if (hosts != null) {
+                view.setHosts(hosts);
+            }
+            return applyLifecycleMethods(viewName, view);
+        }
+        // Check for special "forward:" prefix.
+        if (viewName.startsWith(FORWARD_URL_PREFIX)) {
+            String forwardUrl = viewName.substring(FORWARD_URL_PREFIX.length());
+            return new MyInternalResourceView(forwardUrl);
+        }
+        // Else fall back to superclass implementation: calling loadView.
+        return super.createView(viewName, locale);
+    }
+
+
+    protected boolean isRedirectContextRelative() {
+        return this.redirectContextRelative;
     }
 
     @Nullable

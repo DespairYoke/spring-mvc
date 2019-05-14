@@ -27,3 +27,7 @@
 * tag v1.0.1 基于编码替换web.xml
 
 * tag v1.1.0 模拟spring mvc初始化web.xml和applicationContext.xml
+
+* tag v2.0.0 可以正常使用，但不包含对redirect和forward的处理
+
+* tag v2.0.1 增加对redirect和forward的处理

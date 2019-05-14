@@ -4,13 +4,10 @@ import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * TODO...
- *
- * @author zwd
- * @since 2019-04-22
- **/
 public interface MyHandlerMapping {
+
+    String URI_TEMPLATE_VARIABLES_ATTRIBUTE = MyHandlerMapping.class.getName() + ".uriTemplateVariables";
+
 
     @Nullable
     MyHandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;

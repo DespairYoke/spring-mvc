@@ -15,4 +15,7 @@ public interface MyFlashMapManager {
 
     @Nullable
     MyFlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response);
+
+    void saveOutputFlashMap(MyFlashMap flashMap, HttpServletRequest request, HttpServletResponse response);
+
 }
