@@ -335,9 +335,18 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
 
 
     private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
-        return null;
+        List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+
+        // Annotation-based argument resolution
+        resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
+        resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
+        return resolvers;
     }
 
+    @Nullable
+    protected ConfigurableBeanFactory getBeanFactory() {
+        return this.beanFactory;
+    }
     /**
      * Return the list of argument resolvers to use for {@code @InitBinder}
      * methods including built-in and custom resolvers.

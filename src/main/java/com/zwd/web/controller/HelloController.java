@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class HelloController {
 
     @GetMapping(value = "hello")
-    public String index() {
+    public String index(String name) {
+        System.out.println(name);
         return "index";
     }
 
