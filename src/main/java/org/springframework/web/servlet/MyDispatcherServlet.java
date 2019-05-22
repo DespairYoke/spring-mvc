@@ -210,12 +210,12 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
     private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
                                        @Nullable MyHandlerExecutionChain mappedHandler, @Nullable MyModelAndView mv,
                                        @Nullable Exception exception) throws Exception {
-
+        // 渲染页面
         render(mv, request, response);
     }
 
     protected void render(MyModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        // Determine locale for request and apply it to the response.
+        //  // 根据请求决定回复消息的 locale
         Locale locale =
                 (this.localeResolver != null ? this.localeResolver.resolveLocale(request) : request.getLocale());
         response.setLocale(locale);

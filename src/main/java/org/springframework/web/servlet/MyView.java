@@ -13,9 +13,11 @@ public interface MyView {
     String PATH_VARIABLES = MyView.class.getName() + ".pathVariables";
 
 
+    //渲染页面
     void render(@Nullable Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
             throws Exception;
 
+    //获取网页文件的类型和编码
     @Nullable
     default String getContentType() {
         return null;
