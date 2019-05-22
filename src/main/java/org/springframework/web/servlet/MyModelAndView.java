@@ -38,6 +38,14 @@ public class MyModelAndView {
         return this.status;
     }
 
+    public boolean isReference() {
+        return (this.view instanceof String);
+    }
+
+    public Map<String, Object> getModel() {
+        return getModelMap();
+    }
+
     @Nullable
     public MyView getView() {
         return (this.view instanceof MyView ? (MyView) this.view : null);
@@ -61,6 +69,15 @@ public class MyModelAndView {
     @Nullable
     protected Map<String, Object> getModelInternal() {
         return this.model;
+    }
+
+    public void setViewName(@Nullable String viewName) {
+        this.view = viewName;
+    }
+
+    public MyModelAndView addObject(String attributeName, Object attributeValue) {
+        getModelMap().addAttribute(attributeName, attributeValue);
+        return this;
     }
 
 }

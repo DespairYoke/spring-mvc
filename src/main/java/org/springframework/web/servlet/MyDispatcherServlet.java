@@ -127,7 +127,7 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
 
     private void initViewResolvers(ApplicationContext context) {
         this.viewResolvers = null;
-
+        //加载app-context.xml中配置的viewResolver
         if (this.detectAllViewResolvers) {
             // Find all ViewResolvers in the ApplicationContext, including ancestor contexts.
             Map<String, MyViewResolver> matchingBeans =
@@ -139,23 +139,9 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
 
             }
         }
-        else {
-            try {
-                MyViewResolver vr = context.getBean(VIEW_RESOLVER_BEAN_NAME, MyViewResolver.class);
-                this.viewResolvers = Collections.singletonList(vr);
-            }
-            catch (NoSuchBeanDefinitionException ex) {
-                // Ignore, we'll add a default ViewResolver later.
-            }
-        }
-
-        // Ensure we have at least one ViewResolver, by registering
-        // a default ViewResolver if no other resolvers are found.
+        //如果没有配置的viewResolver使用配置文件默认配置
         if (this.viewResolvers == null) {
             this.viewResolvers = getDefaultStrategies(context, MyViewResolver.class);
-            if (logger.isDebugEnabled()) {
-                logger.debug("No ViewResolvers found in servlet '" + getServletName() + "': using default");
-            }
         }
     }
 
@@ -191,35 +177,6 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
         return context.getAutowireCapableBeanFactory().createBean(clazz);
     }
 
-    //    protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
-//        String key = strategyInterface.getName();
-//        String value = defaultStrategies.getProperty(key);
-//        if (value != null) {
-//            String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
-//            List<T> strategies = new ArrayList<>(classNames.length);
-//            for (String className : classNames) {
-//                try {
-//                    Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
-//                    Object strategy = createDefaultStrategy(context, clazz);
-//                    strategies.add((T) strategy);
-//                }
-//                catch (ClassNotFoundException ex) {
-//                    throw new BeanInitializationException(
-//                            "Could not find DispatcherServlet's default strategy class [" + className +
-//                                    "] for interface [" + key + "]", ex);
-//                }
-//                catch (LinkageError err) {
-//                    throw new BeanInitializationException(
-//                            "Unresolvable class definition for DispatcherServlet's default strategy class [" +
-//                                    className + "] for interface [" + key + "]", err);
-//                }
-//            }
-//            return strategies;
-//        }
-//        else {
-//            return new LinkedList<>();
-//        }
-//    }
     @Override
     protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -244,8 +201,6 @@ public class MyDispatcherServlet extends MyFrameworkServlet{
         MyHandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 //
         mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-
-//        applyDefaultViewName(processedRequest, mv);
 
         processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 

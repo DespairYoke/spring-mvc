@@ -174,20 +174,10 @@ public abstract class MyFrameworkServlet extends MyHttpServletBean{
 
     protected WebApplicationContext createWebApplicationContext(@Nullable ApplicationContext parent) {
         /**
-         * 活获取加载方式，默认为{@link XmlWebApplicationContext}
+         * 获取加载方式，默认为{@link XmlWebApplicationContext}
          */
         Class<?> contextClass = getContextClass();
-        if (this.logger.isDebugEnabled()) {
-            this.logger.debug("Servlet with name '" + getServletName() +
-                    "' will try to create custom WebApplicationContext context of class '" +
-                    contextClass.getName() + "'" + ", using parent context [" + parent + "]");
-        }
-        if (!ConfigurableWebApplicationContext.class.isAssignableFrom(contextClass)) {
-            throw new ApplicationContextException(
-                    "Fatal initialization error in servlet with name '" + getServletName() +
-                            "': custom WebApplicationContext class [" + contextClass.getName() +
-                            "] is not of type ConfigurableWebApplicationContext");
-        }
+
         ConfigurableWebApplicationContext wac =
                 (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 

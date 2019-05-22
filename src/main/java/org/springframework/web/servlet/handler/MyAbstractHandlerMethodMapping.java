@@ -51,14 +51,7 @@ public abstract class MyAbstractHandlerMethodMapping<T> extends MyAbstractHandle
         String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 
         HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-        if (logger.isDebugEnabled()) {
-            if (handlerMethod != null) {
-                logger.debug("Returning handler method [" + handlerMethod + "]");
-            }
-            else {
-                logger.debug("Did not find handler method for [" + lookupPath + "]");
-            }
-        }
+
         return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 
 
@@ -324,7 +317,7 @@ public abstract class MyAbstractHandlerMethodMapping<T> extends MyAbstractHandle
             }
             methods.forEach((method, mapping) -> {
                 Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
-                registerHandlerMethod(handler, invocableMethod, mapping);
+                registerHandlerMethod(handler, invocableMethod, mapping); //mapping为RequestMappingInfo
             });
         }
     }

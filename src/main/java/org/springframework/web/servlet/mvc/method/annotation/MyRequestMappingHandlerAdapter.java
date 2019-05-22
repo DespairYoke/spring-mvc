@@ -138,20 +138,7 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
 
         MyModelAndView mav;
 
-
-
-        // No synchronization on session demanded at all...
         mav = invokeHandlerMethod(request, response, handlerMethod);
-
-
-        if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
-            if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
-                applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
-            }
-            else {
-                prepareResponse(response);
-            }
-        }
 
         return mav;
     }
@@ -217,7 +204,9 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
 
         ServletWebRequest webRequest = new ServletWebRequest(request, response);
         try {
+            //@InitBinder处理
             WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+            //@ModelAttribute处理
             ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
             MyServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
@@ -308,7 +297,7 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
     protected InitBinderDataBinderFactory createDataBinderFactory(List<InvocableHandlerMethod> binderMethods)
             throws Exception {
 
-        return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
+        return new MyServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
     }
 
     @Nullable
@@ -320,6 +309,7 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
         // Do this first, it may add ResponseBody advice beans
 
         if (this.argumentResolvers == null) {
+            //为后续参数处理做准备
             List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
             this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
         }
@@ -340,6 +330,8 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
         // Annotation-based argument resolution
         resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
         resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), true));
+        resolvers.add(new MyServletModelAttributeMethodProcessor(false));
+        resolvers.add(new MyServletModelAttributeMethodProcessor(true));
         return resolvers;
     }
 
@@ -362,6 +354,8 @@ public class MyRequestMappingHandlerAdapter extends MyAbstractHandlerMethodAdapt
     private List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
 
         List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
+
+        handlers.add(new MyModelAndViewMethodReturnValueHandler());
 
         handlers.add(new MyViewMethodReturnValueHandler());
 

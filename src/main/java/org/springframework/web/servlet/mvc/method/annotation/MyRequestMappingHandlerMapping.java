@@ -57,7 +57,7 @@ public class MyRequestMappingHandlerMapping extends MyRequestMappingInfoHandlerM
     protected MyRequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
         MyRequestMappingInfo info = createRequestMappingInfo(method);
         if (info != null) {
-            MyRequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
+            MyRequestMappingInfo typeInfo = createRequestMappingInfo(handlerType); //handlerTyp 是类 这里为了解决类上的@RequestMapping使用
             if (typeInfo != null) {
                 info = typeInfo.combine(info);
             }
@@ -68,7 +68,7 @@ public class MyRequestMappingHandlerMapping extends MyRequestMappingInfoHandlerM
 
     @Nullable
     private MyRequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
-        RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
+        RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);//判断某方法或者类是否含有@RequestMapping注解
         MyRequestCondition<?> condition = (element instanceof Class ?
                 getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
         return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
@@ -90,8 +90,8 @@ public class MyRequestMappingHandlerMapping extends MyRequestMappingInfoHandlerM
 
         MyRequestMappingInfo.Builder builder = MyRequestMappingInfo
                 .paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
-                .methods(requestMapping.method())
-                .params(requestMapping.params())
+                .methods(requestMapping.method()) //请求方式get post...
+                .params(requestMapping.params()) //
                 .headers(requestMapping.headers())
                 .consumes(requestMapping.consumes())
                 .produces(requestMapping.produces())
