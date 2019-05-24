@@ -2,6 +2,11 @@
 本项目使用maven tomcat的插件进行启动，也可以打包放入tomcat中。
 
 #### tomcat插件配置
+更改项目类型为war
+```xml
+<packaging>war</packaging>
+```
+
 ```xml
 <plugin>
     <groupId>org.apache.tomcat.maven</groupId>
